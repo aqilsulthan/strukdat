@@ -1,0 +1,257 @@
+//Aqil Sulthan Yuki Maye
+//5027211007 - Struktur Data - B
+//Program BFS, DFS, dan Dijkstra Adjacency Matrix
+
+#include<iostream>
+#include<set>
+#include<list>
+#include <vector>
+#include <map>
+using namespace std;
+#define INF 0x3f3f3f3f
+bool dfsChecked = false;
+
+class Graph
+{
+  int numVerteks;
+  list<pair<int, int> > *adjMatrix;
+  map<int, bool> dfs_vistNode;
+  bool *visited;
+
+  public:
+    Graph(int verteks);
+    void tambahEdge(int source, int dest, int cost);
+    void adjacencyMatrix();
+    void BFS(int verteksAwal, int verteksAkhir);
+    void DFS(int v, int end);
+	void dijkstraMatrix(int source, int dest);
+};
+
+//inisialisasi verteks
+Graph::Graph(int verteks)
+{
+  numVerteks = verteks;
+  adjMatrix = new list<pair<int, int> >[verteks];
+}
+
+// menambahkan edge di graph
+void Graph::tambahEdge(int source, int dest, int cost)
+{
+  adjMatrix[source].push_back(make_pair(dest, cost));
+  adjMatrix[source].sort();
+}
+
+//program untuk menampilkan adjacency matrix
+void Graph::adjacencyMatrix()
+{
+  for (int i = 0; i < numVerteks; i++)
+  {
+    list<pair<int, int> >::iterator it;
+
+    int track = 0;
+    int through = 0;
+    for (it = adjMatrix[i].begin(); it != adjMatrix[i].end(); ++it)
+    {
+      int temp = (*it).first;
+      if (through == 0)
+      {
+        while (track < temp)
+        {
+          cout << "0 ";
+          ++track;
+          through++;
+        }
+      }
+      else
+      {
+        while ((track + 1) < temp)
+        {
+          cout << "0 ";
+          ++track;
+          through++;
+        }
+      }
+      cout << "1 ";
+      through++;
+    }
+    while ((numVerteks - through) > 0)
+    {
+      through++;
+      cout << "0 ";
+    }
+    cout << endl;
+  }
+}
+
+//program untuk menjalankan bfs
+void Graph::BFS(int verteksAwal, int verteksAkhir)
+{
+  visited = new bool[numVerteks];
+  for (int i = 0; i < numVerteks; i++)
+    visited[i] = false;
+
+  list<int> queue;
+
+  visited[verteksAwal] = true;
+  queue.push_back(verteksAwal);
+  list<pair<int, int> >::iterator i;
+
+  while (!queue.empty())
+  {
+    int verteksSekarang = queue.front();
+    if (verteksSekarang == verteksAkhir)
+    {
+      break;
+    }
+
+    cout << verteksSekarang << " ";
+    queue.pop_front();
+
+    for (i = adjMatrix[verteksSekarang].begin(); i != adjMatrix[verteksSekarang].end(); ++i)
+    {
+      int adjverteks = (*i).first;
+      if (!visited[adjverteks])
+      {
+        visited[adjverteks] = true;
+        queue.push_back(adjverteks);
+      }
+    }
+  }
+  cout << endl;
+}
+
+//program untuk menjalankan dfs
+void Graph::DFS(int v, int end)
+{
+    if (dfsChecked == false)
+    {
+
+    dfs_vistNode[v] = true;
+    cout << v << " ";
+
+
+    list<pair<int, int> >::iterator i;
+ 
+
+      for (i = adjMatrix[v].begin(); i != adjMatrix[v].end(); ++i)
+      {
+
+        if (v == end)
+        {
+          dfsChecked = true;
+        }
+        if (!dfs_vistNode[(*i).first])
+        {
+          DFS((*i).first, end);
+        }
+      }
+    }
+    
+}
+
+//program untuk menjalankan dijkstra
+void Graph::dijkstraMatrix(int source, int dest)
+{
+    set< pair<int, int> > setds;
+    vector<int> dist(numVerteks, INF);
+
+    setds.insert(make_pair(0, source));
+    dist[source] = 0;
+ 
+    while (!setds.empty())
+    {
+
+        pair<int, int> tmp = *(setds.begin());
+        setds.erase(setds.begin());
+
+        int u = tmp.second;
+ 
+        list<pair<int, int> >::iterator i;
+        for (i = adjMatrix[u].begin(); i != adjMatrix[u].end(); ++i)
+        {   
+            int v = (*i).first;
+            int cost = (*i).second;
+            if (dist[v] > dist[u] + cost)
+            {
+                if (dist[v] != INF)
+                {
+                  setds.erase(setds.find(make_pair(dist[v], v)));
+                }
+
+                dist[v] = dist[u] + cost;
+                setds.insert(make_pair(dist[v], v));
+            }
+        }
+    }
+ 
+    printf("Jarak | Verteks dari titik awal\n");
+    for (int i = 0; i < numVerteks; ++i)
+    {
+      if (i == dest)
+      {
+        break;
+      }
+      
+      printf("%d \t\t %d\n", i, dist[i]);
+    }
+}
+
+int main()
+{
+  //menentukan edge, verteks dan bobot dari graph
+  Graph g(20);
+    g.tambahEdge(0, 19, 5); //rumah ke lapangan voli
+    g.tambahEdge(0, 1, 3); //rumah ke gerbang blok ef
+    g.tambahEdge(1, 0, 3); //gerbang blok ef ke rumah
+    g.tambahEdge(1, 2, 2); //gerbang blok ef ke warung toserba
+    g.tambahEdge(2, 1, 2); //warung toserba ke gerbang blok ef
+    g.tambahEdge(2, 3, 3); //warung toserba ke gerbang blok g
+    g.tambahEdge(3, 2, 3); //gerbang blok g ke warung toserba
+    g.tambahEdge(3, 4, 5); //gerbang blok g ke selera resto
+    g.tambahEdge(4, 3, 5); //selera resto ke gerbang blok g
+    g.tambahEdge(4, 5, 5); //selera resto ke koolkost
+    g.tambahEdge(5, 4, 5); //koolkost ke selera resto
+    g.tambahEdge(5, 6, 4); //koolkost ke masjid at-taufiq
+    g.tambahEdge(6, 5, 4); //masjid at-taufiq ke koolkost
+    g.tambahEdge(6, 7, 5); //masjid at-taufiq ke salon beauty
+    g.tambahEdge(6, 14, 8); //Masjid at-taufiq ke Kebun Anggur Alphabet's
+    g.tambahEdge(7, 6, 5); //salon beauty ke masjid at-taufiq
+    g.tambahEdge(7, 8, 5); //salon beauty ke bundara tamsos
+    g.tambahEdge(8, 7, 4); //bundaran tamsos ke salon beauty
+    g.tambahEdge(8, 9, 2); //bundaran tamsos ke indomaret tamsos
+    g.tambahEdge(9, 8, 2); //indomaret tamsos ke bundaran tamsos
+    g.tambahEdge(9, 10, 4); //indomaret tamsos ke apartemen onesentosa
+    g.tambahEdge(10, 9, 4); //apartemen onesentosa ke indomaret tamsos
+    g.tambahEdge(10, 11, 3); //apartemen onesentosa ke klub sentosa
+    g.tambahEdge(11, 10, 3); //klub sentosa ke apartemen onesentosa
+    g.tambahEdge(11, 12, 3); //klub sentosa ke gerbang blok c
+    g.tambahEdge(12, 11, 3); //gerbang blok c ke klub sentosa
+    g.tambahEdge(12, 13, 1); //gerbang blok c ke warkop sehati
+    g.tambahEdge(13, 12, 1); //warkop sehati ke gerbang blok c
+    g.tambahEdge(13, 14, 2); //warkop sehati ke kebun anggur alphabets
+    g.tambahEdge(14, 6, 8); //kebun anggur alphabets ke masjid at-taufiq
+    g.tambahEdge(14, 13, 2); //kebun anggur alphabets ke warkop sehati
+    g.tambahEdge(14, 15, 4); //kebun anggur alphabets ke masjid nurul yaqin
+    g.tambahEdge(15, 14, 4); //masjid nurul yaqin ke kebun anggur alphabets
+    g.tambahEdge(15, 16, 1); //masjid nurul yaqin ke sdit annida
+    g.tambahEdge(16, 15, 1); //sdit annida ke masjid nurul yaqin
+    g.tambahEdge(16, 17, 2); //sdit annida ke smpn 2 cikarang selatan
+    g.tambahEdge(17, 16, 2); //smpn 2 cikarang elatan ke sdit annida
+    g.tambahEdge(17, 18, 2); //smpn 2 cikarang selatan ke gerbang blok f
+    g.tambahEdge(18, 17, 2); //gerbang blok f ke smpn 2 cikarang selatan
+    g.tambahEdge(18, 19, 2); //gerbang blok f ke  lapangan voli
+    g.tambahEdge(19, 18, 2); //lapangan voli ke gerbang blok f
+    g.tambahEdge(19, 0, 5); //lapangan voli ke rumah
+
+  cout << endl << "Adjacency Matrix" << endl;
+  g.adjacencyMatrix();
+  cout << endl << "BFS: ";
+  g.BFS(3, 15); //gerbang blok g ke masjid nurul yaqin
+  cout << endl << "DFS: ";
+  g.DFS(3, 15); //gerbang blok g ke masjid nurul yaqin
+  cout << endl;
+  cout << endl << "Dijkstra" << endl;
+  g.dijkstraMatrix(3, 15); //gerbang blok g ke masjid nurul yaqin
+
+  return 0;
+}
