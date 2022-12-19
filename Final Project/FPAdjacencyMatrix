@@ -184,7 +184,7 @@ void Graph::dijkstraMatrix(int source, int dest)
         }
     }
  
-    printf("Jarak | Verteks dari titik awal\n");
+    printf("Verteks | Jarak dari titik awal\n");
     for (int i = 0; i < numVerteks; ++i)
     {
       if (i == dest)
